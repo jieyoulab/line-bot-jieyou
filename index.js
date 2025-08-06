@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const { Client, middleware } = require("@line/bot-sdk");
 const flexMessages = require("./flex/caseTypeMessages")
+const customSystem = require("./flex/customSystem");
 
 const app = express();
 
@@ -44,7 +45,15 @@ function handleEvent(event) {
     return Promise.resolve(null);
   }
 
-//   const msg = event.message.text.trim();
+  const msg = event.message.text.trim();
+
+  if (msg === "客製化系統") {
+    return client.replyMessage(event.replyToken, {
+      type: "flex",
+      altText: "客製化介紹",
+      contents: customSystem,
+    });
+  }
 
 //   // 偵測「客製化系統」或「報名系統」關鍵字，回傳 Flex
 //   if (msg === "客製化系統" || msg === "我要建立報名系統") {
@@ -58,6 +67,7 @@ function handleEvent(event) {
     text: `您傳來的是：${event.message.text}`,
   });
 }
+
 
 const port = process.env.PORT || 3006;
 app.listen(port, () => {
