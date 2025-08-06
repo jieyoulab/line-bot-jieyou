@@ -16,6 +16,11 @@ const config = {
 
 const client = new Client(config);
 
+// 首頁
+app.get("/", (req, res) => {
+    res.send("✅ Jieyou LINE Bot is running!");
+  });
+
 // webhook 接收與處理
 app.post("/webhook", middleware(config), (req, res) => {
     // 加入這段處理 LINE 的空事件驗證請求
