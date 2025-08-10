@@ -60,9 +60,9 @@ module.exports = {
           style: "secondary",
           action: {
             type: "postback",
-            label: "⬅️ 回總覽",
+            label: "⬅️ 收合",
             data: "action=view_plan_overview&plan=basic",
-            displayText: "回：🌱 基礎啟動包"
+            //displayText: "回：🌱 基礎啟動包" // 不放 displayText → 聊天室不出字
           }
         },
         {

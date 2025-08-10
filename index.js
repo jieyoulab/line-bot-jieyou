@@ -2,8 +2,8 @@ require("dotenv").config();
 const express = require("express");
 const { Client, middleware } = require("@line/bot-sdk");
 
-//flex_message設計
-const flexMessages = require("./flex/caseTypeMessages")
+//// flex bubbles
+//const flexMessages = require("./flex/caseTypeMessages")
 // const customSystem = require("./flex/customSystem");
 // const productPlanCarousel = require("./flex/productPlanCarousel");
 const basicOverviewBubble = require("./flex/basicOverviewBubble");
@@ -23,7 +23,8 @@ const config = {
 
 const client = new Client(config);
 
-// 首頁
+// 首頁 
+// health check
 app.get("/", (req, res) => {
     res.send("Jieyou LINE Bot is running!");
   });
@@ -45,14 +46,44 @@ app.post("/webhook", middleware(config), (req, res) => {
 
   
 
+//
+// --- handlers ---
 // 回覆邏輯
 function handleEvent(event) {
+  // 1) 先處理 postback（不顯示文字、切換卡片）（切換 總覽 <-> 詳細；不顯示文字）
+  if (event.type === "postback") {
+    const p = new URLSearchParams(event.postback.data || "");
+    const action = p.get("action");
+    const plan = p.get("plan");
+
+    if (plan === "basic") {
+      if (action === "view_plan") {
+        return client.replyMessage(event.replyToken, {
+          type: "flex",
+          altText: "🌱 基礎啟動包（詳細）",
+          contents: basicDetailBubble
+        });
+      }
+      if (action === "view_plan_overview") {
+        return client.replyMessage(event.replyToken, {
+          type: "flex",
+          altText: "🌱 基礎啟動包（總覽）",
+          contents: basicOverviewBubble
+        });
+      }
+    }
+    // 其他未定義的 postback 就先忽略
+    return Promise.resolve(null);
+  }
+
+  // 2) 再處理文字訊息（給你測試或接圖文選單「傳送訊息」）
   if (event.type !== "message" || event.message.type !== "text") {
     return Promise.resolve(null);
   }
 
   const msg = event.message.text.trim();
 
+  // 點圖文選單（傳訊息：客製化系統）→ 送出總覽卡
   if (msg === "客製化系統") {
     return client.replyMessage(event.replyToken, {
       type: "flex",
@@ -61,42 +92,15 @@ function handleEvent(event) {
     });
   }
 
-//   // 偵測「客製化系統」或「報名系統」關鍵字，回傳 Flex
-//   if (msg === "客製化系統" || msg === "我要建立報名系統") {
-//     return client.replyMessage(event.replyToken, flexMessages.featureSelection);
-//   }
 
   // 其他可以自己加更多分流條件
 
-  return client.replyMessage(event.replyToken, {
-    type: "text",
-    text: `您傳來的是：${event.message.text}`,
-  });
-
-    // Postback
-    if (event.type === "postback") {
-        const p = new URLSearchParams(event.postback.data || "");
-        const action = p.get("action");
-        const plan = p.get("plan");
-    
-        if (action === "view_plan" && plan === "basic") {
-          return client.replyMessage(event.replyToken, {
-            type: "flex",
-            altText: "🌱 基礎啟動包（詳細）",
-            contents: basicDetailBubble
-          });
-        }
-    
-        if (action === "view_plan_overview" && plan === "basic") {
-          return client.replyMessage(event.replyToken, {
-            type: "flex",
-            altText: "🌱 基礎啟動包（總覽）",
-            contents: basicOverviewBubble
-          });
-        }
-      }
-    
-      return Promise.resolve(null);
+//   return client.replyMessage(event.replyToken, {
+//     type: "text",
+//     text: `您傳來的是：${event.message.text}`,
+//   });
+ 
+  return Promise.resolve(null);
 
 }
 

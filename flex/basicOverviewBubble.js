@@ -41,8 +41,8 @@ module.exports = {
           action: {
             type: "postback",
             label: "查看詳細內容",
-            data: "action=view_plan&plan=basic",
-            displayText: "查看：🌱 基礎啟動包"
+            data: "action=view_plan&plan=basic"
+            //displayText: "查看：🌱 基礎啟動包"//// 不放 displayText → 聊天室不出字
           }
         },
         {
