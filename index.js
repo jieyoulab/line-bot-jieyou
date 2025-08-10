@@ -1,12 +1,16 @@
 require("dotenv").config();
 const express = require("express");
 const { Client, middleware } = require("@line/bot-sdk");
+
+//flex_message設計
 const flexMessages = require("./flex/caseTypeMessages")
 const customSystem = require("./flex/customSystem");
+const productPlanCarousel = require("./flex/productPlanCarousel");
 
 const app = express();
 
 //LINE 的 SDK middleware 會自己解析 req.body 並驗證簽章
+//別在全域 app.use(express.json())，避免影響 /webhook 的簽章驗證；若有自訂 API 再針對單一路由掛上 express.json()
 //app.use(express.json()); // 不需要，middleware 已處理
 
 const config = {
@@ -19,7 +23,7 @@ const client = new Client(config);
 
 // 首頁
 app.get("/", (req, res) => {
-    res.send("✅ Jieyou LINE Bot is running!");
+    res.send("Jieyou LINE Bot is running!");
   });
 
 // webhook 接收與處理
@@ -32,7 +36,7 @@ app.post("/webhook", middleware(config), (req, res) => {
     Promise.all(req.body.events.map(handleEvent))
       .then((result) => res.json(result))
       .catch((err) => {
-        console.error("❌ webhook error", err);
+        console.error("webhook error", err);
         res.status(500).end();
       });
   });
@@ -51,7 +55,7 @@ function handleEvent(event) {
     return client.replyMessage(event.replyToken, {
       type: "flex",
       altText: "客製化介紹",
-      contents: customSystem,
+      contents: productPlanCarousel, //flex msg檔案 
     });
   }
 
