@@ -4,8 +4,10 @@ const { Client, middleware } = require("@line/bot-sdk");
 
 //flex_message設計
 const flexMessages = require("./flex/caseTypeMessages")
-const customSystem = require("./flex/customSystem");
-const productPlanCarousel = require("./flex/productPlanCarousel");
+// const customSystem = require("./flex/customSystem");
+// const productPlanCarousel = require("./flex/productPlanCarousel");
+const basicOverviewBubble = require("./flex/basicOverviewBubble");
+const basicDetailBubble = require("./flex/basicDetailBubble");
 
 const app = express();
 
@@ -55,7 +57,7 @@ function handleEvent(event) {
     return client.replyMessage(event.replyToken, {
       type: "flex",
       altText: "客製化介紹",
-      contents: productPlanCarousel, //flex msg檔案 
+      contents: basicOverviewBubble, //flex msg檔案 
     });
   }
 
@@ -70,6 +72,32 @@ function handleEvent(event) {
     type: "text",
     text: `您傳來的是：${event.message.text}`,
   });
+
+    // Postback
+    if (event.type === "postback") {
+        const p = new URLSearchParams(event.postback.data || "");
+        const action = p.get("action");
+        const plan = p.get("plan");
+    
+        if (action === "view_plan" && plan === "basic") {
+          return client.replyMessage(event.replyToken, {
+            type: "flex",
+            altText: "🌱 基礎啟動包（詳細）",
+            contents: basicDetailBubble
+          });
+        }
+    
+        if (action === "view_plan_overview" && plan === "basic") {
+          return client.replyMessage(event.replyToken, {
+            type: "flex",
+            altText: "🌱 基礎啟動包（總覽）",
+            contents: basicOverviewBubble
+          });
+        }
+      }
+    
+      return Promise.resolve(null);
+
 }
 
 
