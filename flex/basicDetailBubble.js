@@ -5,11 +5,11 @@ module.exports = {
       layout: "vertical",
       spacing: "sm",
       contents: [
-        { type: "text", text: "🌱 基礎啟動包｜詳細內容", weight: "bold", size: "lg", color: "#4e7699" },
-        { type: "text", text: "分段明細與加購項目", size: "xs", color: "#888888" },
+        { type: "text", text: "🌱 基礎方案｜內容明細", weight: "bold", size: "lg", color: "#4e7699" },
+        { type: "text", text: "內容明細與加購項目", size: "xs", color: "#888888" },
         { type: "separator", margin: "md" },
   
-        { type: "text", text: "1) LINE 官方帳號開設", weight: "bold", size: "sm", margin: "md" },
+        { type: "text", text: "1️⃣ LINE 官方帳號開設", weight: "bold", size: "sm", margin: "md" },
         {
           type: "box",
           layout: "vertical",
@@ -20,7 +20,8 @@ module.exports = {
           ]
         },
   
-        { type: "text", text: "2) LINE 自動回覆機器人", weight: "bold", size: "sm", margin: "md" },
+        { type: "separator", margin: "md" },
+        { type: "text", text: "2️⃣ LINE 自動回覆機器人", weight: "bold", size: "sm", margin: "md" },
         {
           type: "box",
           layout: "vertical",
@@ -32,16 +33,19 @@ module.exports = {
           ]
         },
   
-        { type: "text", text: "3) 圖文選單 / 訊息卡片", weight: "bold", size: "sm", margin: "md" },
+        { type: "separator", margin: "md" },
+        { type: "text", text: "3️⃣ 圖文選單 / 訊息卡片", weight: "bold", size: "sm", margin: "md" },
         {
           type: "box",
           layout: "vertical",
           spacing: "xs",
           contents: [
-            { type: "text", text: "✅ 圖文選單設計：圖示、點擊區域、風格一致", size: "sm", wrap: true },
+            { type: "text", text: "✅ 圖文選單設計：圖示、點擊區域", size: "sm", wrap: true },
             { type: "text", text: "➕ 加購格數：+2格 / +4格 / +6格", size: "sm", wrap: true },
-            { type: "text", text: "✅ 訊息卡片設計：商品 / 方案卡", size: "sm", wrap: true },
-            { type: "text", text: "選單：NT$3,000（基本）｜加購：+$500 / +$1,000 / +$1,500｜卡片：NT$2,500～5,000/張", size: "xs", align: "end", color: "#4e7699" }
+            { type: "text", text: "✅ 訊息卡片設計：訊息 / 商品方案卡", size: "sm", wrap: true },
+            { type: "text", text: "選單：NT$3,000（基本）", size: "xs", align: "end", color: "#4e7699" },
+            { type: "text", text: "加購：+$500 / +$1,000 / +$1,500", size: "xs", align: "end", color: "#4e7699" },
+            { type: "text", text: "卡片：NT$2,500～5,000/張", size: "xs", align: "end", color: "#4e7699" }
           ]
         },
   
@@ -57,19 +61,23 @@ module.exports = {
       contents: [
         {
           type: "button",
-          style: "secondary",
+          style: "primary",
+          color: "#9db0c1",
           action: {
             type: "postback",
-            label: "⬅️ 收合",
-            data: "action=view_plan_overview&plan=basic",
-            //displayText: "回：🌱 基礎啟動包" // 不放 displayText → 聊天室不出字
+            label: "⬅️ 收合（返回總覽）",
+            data: "action=view_plan_overview&plan=basic"
           }
         },
         {
           type: "button",
           style: "primary",
-          action: { type: "uri", label: "📝 立即填單", uri: "https://docs.google.com/forms/..." },
-          color: "#4e7699"
+          color: "#4e7699",
+          action: {
+            type: "uri",
+            label: "📝 填寫需求表單",
+            uri: "https://docs.google.com/forms/d/e/1FAIpQLSdIWw7vChsH5jhvUPhjmOLotBqqwqu8zcoZJEc80zek_t-ARw/viewform"
+          }
         }
       ]
     },

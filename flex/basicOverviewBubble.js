@@ -1,5 +1,6 @@
 module.exports = {
     type: "bubble",
+    size: "mega",
     hero: {
       type: "image",
       url: "https://i.postimg.cc/pr7KhM5y/2.png",
@@ -12,8 +13,8 @@ module.exports = {
       layout: "vertical",
       spacing: "sm",
       contents: [
-        { type: "text", text: "🌱 基礎啟動包", weight: "bold", size: "lg", color: "#4e7699" },
-        { type: "text", text: "LINE OA 開設 + 機器人 + 圖文選單（不含伺服器）", size: "sm", wrap: true, color: "#444444" },
+        { type: "text", text: "🌱 基礎方案", weight: "bold", size: "lg", color: "#4e7699" },
+        { type: "text", text: "LINE OA 開設 + 機器人 + 圖文選單設計", size: "sm", wrap: true, color: "#444444" },
         { type: "separator", margin: "md" },
         {
           type: "box",
@@ -40,18 +41,19 @@ module.exports = {
           color: "#9db0c1",
           action: {
             type: "postback",
-            label: "查看詳細內容",
+            label: "查看內容明細",
             data: "action=view_plan&plan=basic"
-            //displayText: "查看：🌱 基礎啟動包"//// 不放 displayText → 聊天室不出字
+            // 不設定 displayText → 聊天室不會出字
           }
         },
         {
           type: "button",
-          style: "secondary",
+          style: "primary",
+          color: "#4e7699",
           action: {
             type: "uri",
-            label: "📝 立即填單",
-            uri: "https://docs.google.com/forms/..."
+            label: "📝 填寫需求表單",
+            uri: "https://docs.google.com/forms/d/e/1FAIpQLSdIWw7vChsH5jhvUPhjmOLotBqqwqu8zcoZJEc80zek_t-ARw/viewform"
           }
         }
       ]
