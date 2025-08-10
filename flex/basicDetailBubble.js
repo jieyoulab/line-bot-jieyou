@@ -65,8 +65,8 @@ module.exports = {
           color: "#9db0c1",
           action: {
             type: "postback",
-            label: "⬅️ 收合（返回總覽）",
-            data: "action=view_plan_overview&plan=basic"
+            label: "⬅️ 回方案列表",
+            data: "action=view_plan_list"
           }
         },
         {

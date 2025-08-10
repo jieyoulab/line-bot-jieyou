@@ -6,8 +6,16 @@ const { Client, middleware } = require("@line/bot-sdk");
 //const flexMessages = require("./flex/caseTypeMessages")
 // const customSystem = require("./flex/customSystem");
 // const productPlanCarousel = require("./flex/productPlanCarousel");
+
+//Carousel為主 比較好擴充
+const plansMenuCarousel   = require("./flex/carousel/plansMenuCarousel");
+
+//基礎方案
 const basicOverviewBubble = require("./flex/basicOverviewBubble");
 const basicDetailBubble = require("./flex/basicDetailBubble");
+//進階方案
+const proOverviewBubble = require("./flex/proOverviewBubble");
+const proDetailBubble   = require("./flex/proDetailBubble"); 
 
 const app = express();
 
@@ -50,28 +58,58 @@ app.post("/webhook", middleware(config), (req, res) => {
 // --- handlers ---
 // 回覆邏輯
 function handleEvent(event) {
-  // 1) 先處理 postback（不顯示文字、切換卡片）（切換 總覽 <-> 詳細；不顯示文字）
+  // 1) 先處理 postback（不顯示文字、切換卡片）
+  // Postback：切換明細 / 回總覽 / 回列表
   if (event.type === "postback") {
     const p = new URLSearchParams(event.postback.data || "");
+    //// view_plan / view_plan_overview / view_plan_list
     const action = p.get("action");
     const plan = p.get("plan");
 
+    // 回方案列表（兩張總覽）
+    if (action === "view_plan_list") {
+        return client.replyMessage(event.replyToken, {
+          type: "flex",
+          altText: "方案列表（基礎／進階）",
+          contents: plansMenuCarousel
+        });
+      }
+
+    // 基礎方案
     if (plan === "basic") {
       if (action === "view_plan") {
         return client.replyMessage(event.replyToken, {
           type: "flex",
-          altText: "🌱 基礎啟動包（詳細）",
+          altText: "🌱 基礎方案（內容明細）",
           contents: basicDetailBubble
         });
       }
       if (action === "view_plan_overview") {
         return client.replyMessage(event.replyToken, {
           type: "flex",
-          altText: "🌱 基礎啟動包（總覽）",
+          altText: "🌱  基礎方案（總覽）",
           contents: basicOverviewBubble
         });
       }
     }
+
+    // ★ 進階方案 postback
+    if (plan === "pro") {
+        if (action === "view_plan") {
+          return client.replyMessage(event.replyToken, {
+            type: "flex",
+            altText: "🔄 進階方案（內容明細）",
+            contents: proDetailBubble
+          });
+        }
+        if (action === "view_plan_overview") {
+          return client.replyMessage(event.replyToken, {
+            type: "flex",
+            altText: "🔄 進階方案（總覽）",
+            contents: proOverviewBubble
+          });
+        }
+      }
     // 其他未定義的 postback 就先忽略
     return Promise.resolve(null);
   }
@@ -87,8 +125,8 @@ function handleEvent(event) {
   if (msg === "客製化系統") {
     return client.replyMessage(event.replyToken, {
       type: "flex",
-      altText: "客製化介紹",
-      contents: basicOverviewBubble, //flex msg檔案 
+      altText: "方案列表（基礎／進階）",
+      contents: plansMenuCarousel, //carosel 
     });
   }
 
