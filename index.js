@@ -4,6 +4,10 @@ const { Client, middleware } = require("@line/bot-sdk");
 
 const { crawlQueue } = require('./queue'); // 引入 queue 連 Upstash
 
+// (async () => {
+//     await crawlQueue.add('test-job', { message: 'Hello from Line Bot!' });
+//     console.log('✅ Job queued');
+//   })();
 
 //// flex bubbles
 //const flexMessages = require("./flex/caseTypeMessages")
@@ -151,14 +155,13 @@ async function handleEvent(event) {
         type: 'text',
         text: `已收到您的查詢：${section} ${landNo}，稍後會回覆結果`
   });
-
+  }
 //   return client.replyMessage(event.replyToken, {
 //     type: "text",
 //     text: `您傳來的是：${event.message.text}`,
 //   });
  
   //return Promise.resolve(null);
-  }
 }
 
 
