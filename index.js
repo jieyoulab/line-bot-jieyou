@@ -4,10 +4,7 @@ const { Client, middleware } = require("@line/bot-sdk");
 
 const { crawlQueue } = require('./queue'); // 引入 queue 連 Upstash
 
-(async () => {
-    await crawlQueue.add('test-job', { message: 'Hello from Line Bot!' });
-    console.log('✅ Job queued');
-  })();
+
 
 //// flex bubbles
 //const flexMessages = require("./flex/caseTypeMessages")
