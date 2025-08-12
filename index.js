@@ -59,7 +59,29 @@ app.post("/webhook", middleware(config), (req, res) => {
       });
   });
 
+// ---- utils: robust parser ----
+function toHalfWidthDigits(s = '') {
+    // 全形數字轉半形：０-９ -> 0-9
+    return s.replace(/[０-９]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xFF10 + 0x30));
+}
   
+function parseSectionAndLandNo(raw = '') {
+    const msg = toHalfWidthDigits(String(raw).trim());
+  
+    // 允許：空白(含全形)、各種連字號、波浪等；段名允許「段」「小段」「…小段」等結尾形式
+    // 盡量把「第一個數字」當作段名與地號的分界
+    const re = /^(.+?段(?:[^\d０-９]*)?)\s*([0-9]{1,4})(?:[ \u3000\-–—~～]*([0-9]{1,4}))?$/;
+  
+    const m = msg.match(re);
+    if (!m) return null;
+  
+    const section = m[1].trim();     // e.g. "大利段"
+    const no1 = m[2];                // e.g. "1306"
+    const no2 = (m[3] || '').trim(); // e.g. "0000" or ''
+  
+    const landNo = no2 ? `${no1}-${no2}` : no1; // 統一傳給 worker，worker 再二次 normalize 也OK
+    return { section, landNo };
+}  
 
 //
 // --- handlers ---
@@ -126,38 +148,29 @@ async function handleEvent(event) {
     return Promise.resolve(null);
   }
 
-  const raw = event.message.text || '';
-  const msg = raw.trim();
-  console.log('[LINE msg]', JSON.stringify(msg));
+  const msg = event.message.text;
 
-  // 點圖文選單（傳訊息：客製化系統）→ 送出總覽卡
-  if (msg === "客製化系統") {
+  // 先處理你的固定關鍵字
+  if (msg.trim() === "客製化系統") {
     return client.replyMessage(event.replyToken, {
-      type: "flex",
-      altText: "方案列表（基礎／進階）",
-      contents: plansMenuCarousel, //carosel 
+        type: "flex",
+        altText: "方案列表（基礎／進階）",
+        contents: plansMenuCarousel,
     });
   }
 
 
   // 解析「段名 + 地號」：空白可無、可全形、可含後四碼
-  // // 例：大利段1306 / 大利段 1306 / 大利段 1306-0000
-  const re = /^(\S+)[\s\u3000]*?(\d{1,4})(?:[--–—~～\s\u3000]*?(\d{1,4}))?$/;
-  const m = msg.match(re);
-  if (m) {
-    const section = m[1];
-    const no1 = m[2];      // 前四碼
-    const no2 = m[3] || ''; // 後四碼（可無）
+  /// ★ 新：用穩健解析器
+  const parsed = parseSectionAndLandNo(msg);
+  if (parsed) {
+    const { section, landNo } = parsed;
 
-    // 原樣丟給 worker；worker/爬蟲會再做 normalize
-    const landNo = no2 ? `${no1}-${no2}` : no1;
-
-    console.log('[enqueue]', { section, landNo });
     await crawlQueue.add('crawl-land-info', {
-        city: '桃園市',
+        city: '桃園市',       // 你目前只開放復興區
         district: '復興區',
-        section,
-        landNo,
+        section,             // e.g. "大利段"
+        landNo,              // e.g. "1306" 或 "1306-0000"
         userId: event.source.userId
     });
 
