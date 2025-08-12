@@ -4,7 +4,10 @@ const { Client, middleware } = require("@line/bot-sdk");
 
 const { crawlQueue } = require('./queue'); // 引入 queue 連 Upstash
 
-
+        // (async () => {
+        //     await crawlQueue.add('test-job', { message: 'Hello from Line Bot!' });
+        //     console.log('✅ Job queued');
+        // })();
 
 //// flex bubbles
 //const flexMessages = require("./flex/caseTypeMessages")
@@ -123,7 +126,9 @@ async function handleEvent(event) {
     return Promise.resolve(null);
   }
 
-  const msg = event.message.text.trim();
+  const raw = event.message.text || '';
+  const msg = raw.trim();
+  console.log('[LINE msg]', JSON.stringify(msg));
 
   // 點圖文選單（傳訊息：客製化系統）→ 送出總覽卡
   if (msg === "客製化系統") {
@@ -135,11 +140,19 @@ async function handleEvent(event) {
   }
 
 
-  // 其他可以自己加更多分流條件
-  // 假設訊息格式是「大利段 1306」或「大利段 1306-0000」
-  const m = msg.match(/^(\S+)\s+(\d{1,4}(?:-\d{1,4})?)$/);
+  // 解析「段名 + 地號」：空白可無、可全形、可含後四碼
+  // // 例：大利段1306 / 大利段 1306 / 大利段 1306-0000
+  const re = /^(\S+)[\s\u3000]*?(\d{1,4})(?:[--–—~～\s\u3000]*?(\d{1,4}))?$/;
+  const m = msg.match(re);
   if (m) {
-    const [, section, landNo] = m;
+    const section = m[1];
+    const no1 = m[2];      // 前四碼
+    const no2 = m[3] || ''; // 後四碼（可無）
+
+    // 原樣丟給 worker；worker/爬蟲會再做 normalize
+    const landNo = no2 ? `${no1}-${no2}` : no1;
+
+    console.log('[enqueue]', { section, landNo });
     await crawlQueue.add('crawl-land-info', {
         city: '桃園市',
         district: '復興區',
@@ -152,7 +165,12 @@ async function handleEvent(event) {
         type: 'text',
         text: `已收到您的查詢：${section} ${landNo}，稍後會回覆結果`
   });
-  }
+}
+// 沒匹配到就回個提示（避免使用者以為壞掉）
+return client.replyMessage(event.replyToken, {
+    type: 'text',
+    text: '請輸入格式：\n「大利段 0000」或「大利段1000-0000」'
+  });
 //   return client.replyMessage(event.replyToken, {
 //     type: "text",
 //     text: `您傳來的是：${event.message.text}`,
