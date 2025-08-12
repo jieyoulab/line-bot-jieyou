@@ -2,6 +2,9 @@ require("dotenv").config();
 const express = require("express");
 const { Client, middleware } = require("@line/bot-sdk");
 
+const { crawlQueue } = require('./queue'); // 引入 queue 連 Upstash
+
+
 //// flex bubbles
 //const flexMessages = require("./flex/caseTypeMessages")
 // const customSystem = require("./flex/customSystem");
@@ -57,7 +60,7 @@ app.post("/webhook", middleware(config), (req, res) => {
 //
 // --- handlers ---
 // 回覆邏輯
-function handleEvent(event) {
+async function handleEvent(event) {
   // 1) 先處理 postback（不顯示文字、切換卡片）
   // Postback：切換明細 / 回總覽 / 回列表
   if (event.type === "postback") {
@@ -132,14 +135,30 @@ function handleEvent(event) {
 
 
   // 其他可以自己加更多分流條件
+  // 假設訊息格式是「大利段 1306」或「大利段 1306-0000」
+  const m = msg.match(/^(\S+)\s+(\d{1,4}(?:-\d{1,4})?)$/);
+  if (m) {
+    const [, section, landNo] = m;
+    await crawlQueue.add('crawl-land-info', {
+        city: '桃園市',
+        district: '復興區',
+        section,
+        landNo,
+        userId: event.source.userId
+    });
+
+    return client.replyMessage(event.replyToken, {
+        type: 'text',
+        text: `已收到您的查詢：${section} ${landNo}，稍後會回覆結果`
+  });
 
 //   return client.replyMessage(event.replyToken, {
 //     type: "text",
 //     text: `您傳來的是：${event.message.text}`,
 //   });
  
-  return Promise.resolve(null);
-
+  //return Promise.resolve(null);
+  }
 }
 
 
