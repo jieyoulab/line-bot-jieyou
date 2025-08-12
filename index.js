@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const { Client, middleware } = require("@line/bot-sdk");
 
-const { crawlQueue } = require('./services/queue'); // 引入 queue 連 Upstash
+const { crawlQueue } = require('./queue'); // 引入 queue 連 Upstash
 
 
 //// flex bubbles
