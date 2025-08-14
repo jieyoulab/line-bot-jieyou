@@ -98,27 +98,27 @@ async function handleEvent(event) {
     if (action === "case_demo") {
       return client.replyMessage(event.replyToken, {
         type: "text",
-        text: "🧪 DEMO 功能清單，請選擇：",
-        quickReply: {
+        text: "💬以下DEMO功能清單，請選擇：⤵️",
+        quickReply: {//最多可以13個
           items: [
-            // A) 正式路徑：引導使用者輸入（postback）
+            // A) 正式路徑：引導使用者輸入（postback）=>
             {
               type: "action",
               action: {
                 type: "postback",
-                label: "「查詢復興區地段」",
+                label: "「查詢圖資」",
                 data: "action=query_land",
-                displayText: "查詢復興區地段"
+                displayText: "查詢圖資"
               }
             },
-            // B) 立即 DEMO（message）：直接送可解析的字串 → 你的 parser + queue 會接手
+            // B) 其他懸浮按鈕服務 
             {
               type: "action",
-              action: { type: "message", label: "DEMO：大灣段 0000", text: "大灣段 0000" }
+              action: { type: "message", label: "DEMO：服務二", text: "服務二" }
             },
             {
               type: "action",
-              action: { type: "message", label: "DEMO：大利段 1306-0000", text: "大利段 1306-0000" }
+              action: { type: "message", label: "DEMO：服務三", text: "服務三" }
             }
           ]
         }
@@ -168,16 +168,16 @@ async function handleEvent(event) {
     //     return client.replyMessage(event.replyToken, introFlex);
     // }
 
-    // ★ 點「查詢復興區地段」→ 立即要求使用者輸入
+    // ★ 點「查詢圖資」→ 立即要求使用者輸入
     if (action === "query_land") {
         return client.replyMessage(event.replyToken, {
         type: "text",
         text:
-    `請輸入「地段 地號」
-    範例：
-    ・大灣段 0000
-    ・大利段 0000-0000
-    （目前只開放：桃園市 復興區）`
+    `📢 目前只有：桃園市 復興區圖資查詢
+    請輸入「地段 地號」，例如：
+    ・美麗段 0000
+    ・美麗段 0000-0000
+    `
         });
     }
 
@@ -256,14 +256,14 @@ async function handleEvent(event) {
     await crawlQueue.add('crawl-land-info', {
         city: '桃園市',       // 你目前只開放復興區
         district: '復興區',
-        section,             // e.g. "大利段"
-        landNo,              // e.g. "1306" 或 "1306-0000"
+        section,             // e.g. "段"
+        landNo,              // e.g. "1111" 或 "1111-0000"
         userId: event.source.userId //重要
     });
 
     return client.replyMessage(event.replyToken, {
         type: 'text',
-        text: `🔍收到您的查詢：【${section} ${landNo}】，稍後會回覆結果🔜🔜⤵️⤵️`
+        text: `🔍已收到您的查詢：【${section} ${landNo}】，稍後回覆結果，請您耐心等候🔜🔜⤵️⤵️`
   });
 }
 // 沒匹配到就回個提示（避免使用者以為壞掉）
@@ -271,12 +271,6 @@ return client.replyMessage(event.replyToken, {
     type: 'text',
     text: '請輸入想查詢的地段地號格式：\n「大利段 0000」或「大利段0000-0000」'
   });
-//   return client.replyMessage(event.replyToken, {
-//     type: "text",
-//     text: `您傳來的是：${event.message.text}`,
-//   });
- 
-  //return Promise.resolve(null);
 }
 
 
