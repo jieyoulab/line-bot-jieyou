@@ -1,3 +1,5 @@
+//BullMQ + Upstash 連線
+
 require('dotenv').config();
 const { Queue, QueueEvents } = require('bullmq');
 const IORedis = require('ioredis');
