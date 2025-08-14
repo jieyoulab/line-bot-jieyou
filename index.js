@@ -90,7 +90,7 @@ async function handleEvent(event) {
   // Postback：切換明細 / 回總覽 / 回列表
   if (event.type === "postback") {
     const data = event.postback.data || "";
-    console.log("POSTBACK:", raw); 
+    console.log("POSTBACK:", data); 
     const p = new URLSearchParams(data);
     const action = p.get("action");
     const plan = p.get("plan");
@@ -186,7 +186,7 @@ async function handleEvent(event) {
     if (action === 'line_oa_build') {
         return client.replyMessage(event.replyToken, {
           type: "flex",
-          altText: "LINE 官方帳號建置 商品列表",
+          altText: "LINE 官方帳號建置",
           contents: plansMenuCarousel
         });
       }
