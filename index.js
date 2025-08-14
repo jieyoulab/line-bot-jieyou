@@ -171,18 +171,18 @@ async function handleEvent(event) {
         district: '復興區',
         section,             // e.g. "大利段"
         landNo,              // e.g. "1306" 或 "1306-0000"
-        userId: event.source.userId
+        userId: event.source.userId //重要
     });
 
     return client.replyMessage(event.replyToken, {
         type: 'text',
-        text: `已收到您的查詢：${section} ${landNo}，稍後會回覆結果`
+        text: `🔍收到您的查詢：【${section} ${landNo}】，稍後會回覆結果🔜🔜⤵️⤵️`
   });
 }
 // 沒匹配到就回個提示（避免使用者以為壞掉）
 return client.replyMessage(event.replyToken, {
     type: 'text',
-    text: '請輸入格式：\n「大利段 0000」或「大利段1000-0000」'
+    text: '請輸入想查詢的地段地號格式：\n「大利段 0000」或「大利段0000-0000」'
   });
 //   return client.replyMessage(event.replyToken, {
 //     type: "text",
