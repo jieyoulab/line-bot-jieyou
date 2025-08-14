@@ -72,6 +72,7 @@ function areasTab1() { // 友誼推廣
   ];
 }
 
+// Rich Menu 區塊設定範例
 function areasTab2() { // 解憂服務
   const heroY = TAB_H + SP; const heroH = 720;
   const rowY  = heroY + heroH + G; const rowH  = 594; const heroW = 2500 - 2*SP;

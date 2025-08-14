@@ -67,7 +67,7 @@ module.exports = {
           action: {
             type: "postback",
             label: "⬅️ 回方案列表",
-            data: "action=view_plan_list"
+            data: "action=line_oa_build"   //line_oa_build
           }
         },
         {

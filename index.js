@@ -90,6 +90,7 @@ async function handleEvent(event) {
   // Postback：切換明細 / 回總覽 / 回列表
   if (event.type === "postback") {
     const data = event.postback.data || "";
+    console.log("POSTBACK:", raw); 
     const p = new URLSearchParams(data);
     const action = p.get("action");
     const plan = p.get("plan");
@@ -181,15 +182,24 @@ async function handleEvent(event) {
         });
     }
 
-
-    // 回方案列表（兩張總覽）
-    if (action === "view_plan_list") {
+    //方案列表（兩張總覽）
+    if (action === 'line_oa_build') {
         return client.replyMessage(event.replyToken, {
           type: "flex",
-          altText: "方案列表（基礎／進階）",
+          altText: "LINE 官方帳號建置 商品列表",
           contents: plansMenuCarousel
         });
       }
+
+
+    // 回方案列表（兩張總覽）
+    // if (action === "view_plan_list") {
+    //     return client.replyMessage(event.replyToken, {
+    //       type: "flex",
+    //       altText: "方案列表（基礎／進階）",
+    //       contents: plansMenuCarousel
+    //     });
+    //   }
 
     // 基礎方案
     if (plan === "basic") {
@@ -238,10 +248,10 @@ async function handleEvent(event) {
   const msg = event.message.text;
 
   // 先處理你的固定關鍵字
-  if (msg.trim() === "客製化系統") {
+  if (msg.trim() === "LINE 官方帳號建置") {
     return client.replyMessage(event.replyToken, {
         type: "flex",
-        altText: "方案列表（基礎／進階）",
+        altText: "LINE 官方帳號建置",
         contents: plansMenuCarousel,
     });
   }
