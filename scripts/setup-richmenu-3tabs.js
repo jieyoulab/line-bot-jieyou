@@ -174,21 +174,37 @@ async function createMenu(name, areas, imagePath) {
 }
 
 
-// === 8) 綁 alias（含覆蓋） ===
+// === 8) 綁 alias（含覆蓋 + 預檢查） ===
 async function setAlias(richMenuId, alias) {
+  // 1) 預先 GET 檢查：如果 alias 已存在而且已指向同一個 ID，就直接跳過
+  try {
+    const got = await api(`/v2/bot/richmenu/alias/${alias}`, { method: 'GET' });
+    const currentId = got.json?.richMenuId;
+    if (currentId) {
+      if (currentId === richMenuId) {
+        console.log(`🏷️ alias ${alias} already points to ${richMenuId} (skip)`);
+        return;
+      }
+      console.log(`♻️ alias ${alias} points to ${currentId}, will replace → ${richMenuId}`);
+      await api(`/v2/bot/richmenu/alias/${alias}`, { method: 'DELETE' });
+    }
+  } catch (e) {
+    // 404 = alias 不存在，略過；其他錯誤才丟出
+    if (!String(e.message).includes('404')) throw e;
+  }
+
+  // 2) 建立（或重建）；若仍遇到衝突，再強制刪除重建一次
   try {
     await api('/v2/bot/richmenu/alias', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
       body: JSON.stringify({ richMenuAliasId: alias, richMenuId })
     });
     console.log('🏷️ alias created', alias, '→', richMenuId);
   } catch (e) {
-    if (String(e.message).includes('409')) {
-      // // alias 已存在 → 刪掉後重建
-      // 409 表示 alias 已被用過；直接「刪 → 重綁」保證覆蓋到最新的 menu。
-      // 這也解決了多次執行腳本導致的 alias 指向舊 ID 的問題
-      console.log('♻️ alias exists, replace:', alias);
+    const msg = String(e.message);
+    if (msg.includes('409') || msg.includes('conflict richmenu alias id')) {
+      console.log(`⚠️ alias ${alias} conflicted unexpectedly, force replace`);
       await api(`/v2/bot/richmenu/alias/${alias}`, { method:'DELETE' });
       await api('/v2/bot/richmenu/alias', {
         method:'POST',
@@ -201,6 +217,7 @@ async function setAlias(richMenuId, alias) {
     }
   }
 }
+
 
 // === 9) 設預設主圖文選單 ===
 async function setDefault(richMenuId) {
