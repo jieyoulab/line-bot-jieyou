@@ -1,4 +1,6 @@
 // scripts/setup-richmenu-3tabs.js
+
+// === 1) 讀環境變數與小工具 ====
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
@@ -9,17 +11,26 @@ if (!TOKEN) {
   process.exit(1);
 }
 
+//sleep：給重試/等待使用
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 function isReadableStream(x) { return x && typeof x === 'object' && typeof x.pipe === 'function'; }
 
-// ✅ 這裡改：/content 走 api-data，其餘走 api
+
+// === 2) 正確的 API 網域分流 ===
+// 這裡改：/content 走 api-data，其餘走 api
 function pickBase(p) {
   return p.includes('/richmenu/') && p.endsWith('/content')
-    ? 'https://api-data.line.me'
-    : 'https://api.line.me';
-}
+    ? 'https://api-data.line.me' //LINE 的 Rich Menu 圖片上傳要打 api-data.line.me
+    : 'https://api.line.me'; //其他操作（建立、查詢、刪除、alias…）都走 api.line.me
+} //我一直錯就是 ==> 你卡很久的 404 就是因為把上傳打到 api.line.me。這個分流能一勞永逸
 
+
+// === 3) 共用的 API 包裝器 ===
+// Authorization 放這裡統一加。
+// duplex：只有在 ReadableStream（例如 fs.createReadStream）時才需要。
+// 最後把 body 先讀成 text，成功就嘗試 JSON.parse，方便上層判斷與印錯誤。
+// 你現在改為Buffer 上傳（見下文），所以一般不會再用到 ReadableStream；duplex 只是保險
 async function api(p, init = {}) {
   const base = pickBase(p);
   const full = base + p;
@@ -34,12 +45,15 @@ async function api(p, init = {}) {
   try { return { res, json: JSON.parse(text), text }; } catch { return { res, json: null, text }; }
 }
 
+// === 4) Rich Menu 版面配置 ===
 // ---- Layout config ----
-const SIZE = { width: 2500, height: 1686 };
+const SIZE = { width: 2500, height: 1686 }; //圖面尺寸固定 2500×1686（圖片也要同尺寸）
 const TAB_H = 300, SP = 24, G = 24;
 const COLW = [801, 801, 802];
 const COLX = [24, 849, 1674];
 
+// 上方三塊用 richmenuswitch + alias（tab1/2/3），這就是分頁切換的基礎。
+// areasTab1/2/3() 各自回傳不同內容區塊（postback / uri…），你已經排版好了
 const topTabs = () => ([
   { bounds: { x: 0,    y: 0, width: 833, height: TAB_H }, action: { type:'richmenuswitch', richMenuAliasId:'tab1', data:'switch=tab1' } },
   { bounds: { x: 833,  y: 0, width: 833, height: TAB_H }, action: { type:'richmenuswitch', richMenuAliasId:'tab2', data:'switch=tab2' } },
@@ -82,6 +96,10 @@ function areasTab3() { // 案例展示
   ];
 }
 
+// === 5) 等待可讀（解一致性延遲 404） ===
+// 剛 POST /richmenu 立刻 POST /content 常見 404（後端尚未一致）。
+
+// 這段是建立後先 GET 確認，若 404 就退避重試一段時間，等到可讀為止
 async function waitUntilExists(richMenuId, tries = 8) {
   for (let i = 0; i < tries; i++) {
     try {
@@ -98,6 +116,11 @@ async function waitUntilExists(richMenuId, tries = 8) {
   }
   throw new Error(`richmenu ${richMenuId} still 404 after retries`);
 }
+
+// === 6) 圖片上傳（Buffer + 重試 + 正確網域） ===
+// Buffer 上傳：一次送完整 body，避開 Node Stream/duplex 的相容性邊角問題。
+// api() 內已改網域分流：/content 自動打 api-data.line.me。
+// 遇到 404 時才退避重試；遇到 400/401 直接拋出（那是資料或權限錯）
 
 async function uploadImageWithRetry(richMenuId, imagePath, tries = 8) {
   const imgPath = path.resolve(imagePath);
@@ -126,6 +149,9 @@ async function uploadImageWithRetry(richMenuId, imagePath, tries = 8) {
   throw new Error(`content upload still 404 after ${tries} tries`);
 }
 
+// === 7) 建立流程封裝 ===
+//把建立 / 等待 / 上傳打包，讓主流程乾淨直覺。
+//任一階段失敗會有清楚日誌與錯誤訊息
 // ---- Core ops ----
 async function createMenu(name, areas, imagePath) {
   // 1) 建立
@@ -147,6 +173,8 @@ async function createMenu(name, areas, imagePath) {
   return richMenuId;
 }
 
+
+// === 8) 綁 alias（含覆蓋） ===
 async function setAlias(richMenuId, alias) {
   try {
     await api('/v2/bot/richmenu/alias', {
@@ -157,6 +185,9 @@ async function setAlias(richMenuId, alias) {
     console.log('🏷️ alias created', alias, '→', richMenuId);
   } catch (e) {
     if (String(e.message).includes('409')) {
+      // // alias 已存在 → 刪掉後重建
+      // 409 表示 alias 已被用過；直接「刪 → 重綁」保證覆蓋到最新的 menu。
+      // 這也解決了多次執行腳本導致的 alias 指向舊 ID 的問題
       console.log('♻️ alias exists, replace:', alias);
       await api(`/v2/bot/richmenu/alias/${alias}`, { method:'DELETE' });
       await api('/v2/bot/richmenu/alias', {
@@ -171,12 +202,19 @@ async function setAlias(richMenuId, alias) {
   }
 }
 
+// === 9) 設預設主圖文選單 ===
 async function setDefault(richMenuId) {
   await api('/v2/bot/user/all/richmenu/' + richMenuId, { method:'POST' });
   console.log('⭐ default set to', richMenuId);
 }
 
 // ---- Run all ----
+// === 10) 主流程：一次建立三個 Tab ===
+// 順序建立避免三個同時上傳/重試互相干擾。
+
+// 最後把 tab2 設為預設，讓使用者一打開就看到「解憂服務」。
+
+// 上排三塊的 richmenuswitch 會依據 alias 立即生效
 (async () => {
   try {
     const tab1Id = await createMenu('tab1_友誼推廣', areasTab1(), './public/richmenu/tab1.png');
