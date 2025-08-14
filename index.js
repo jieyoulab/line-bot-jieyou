@@ -3,16 +3,12 @@ const express = require("express");
 const { Client, middleware } = require("@line/bot-sdk");
 
 const { crawlQueue } = require('./queue'); // 引入 queue 連 Upstash
-
+        //立即函式 爬蟲worker
         // (async () => {
         //     await crawlQueue.add('test-job', { message: 'Hello from Line Bot!' });
         //     console.log('✅ Job queued');
         // })();
 
-//// flex bubbles
-//const flexMessages = require("./flex/caseTypeMessages")
-// const customSystem = require("./flex/customSystem");
-// const productPlanCarousel = require("./flex/productPlanCarousel");
 
 //Carousel為主 比較好擴充
 const plansMenuCarousel   = require("./flex/carousel/plansMenuCarousel");
@@ -20,6 +16,7 @@ const plansMenuCarousel   = require("./flex/carousel/plansMenuCarousel");
 //基礎方案
 const basicOverviewBubble = require("./flex/basicOverviewBubble");
 const basicDetailBubble = require("./flex/basicDetailBubble");
+
 //進階方案
 const proOverviewBubble = require("./flex/proOverviewBubble");
 const proDetailBubble   = require("./flex/proDetailBubble"); 
@@ -38,6 +35,7 @@ const config = {
 
 const client = new Client(config);
 
+//API 區
 // 首頁 
 // health check
 app.get("/", (req, res) => {
@@ -94,6 +92,58 @@ async function handleEvent(event) {
     //// view_plan / view_plan_overview / view_plan_list
     const action = p.get("action");
     const plan = p.get("plan");
+
+    //地段地號
+
+    // ★ from Rich Menu Tab2 內容區：開查詢指引（Flex + Quick Reply）
+    if (action === "open_query_intro") {
+        const introFlex = {
+        type: "flex",
+        altText: "地段查詢指引",
+        contents: {
+            type: "bubble",
+            body: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+                { type: "text", text: "地段查詢指引", weight: "bold", size: "lg" },
+                { type: "text", text: "目前只開放：桃園市・復興區", size: "sm", color: "#888888", margin: "sm" },
+                { type: "separator", margin: "md" },
+                { type: "text", text: "請輸入：地段 + 地號", size: "sm", margin: "md" },
+                { type: "text", text: "範例：大灣段 0000 或 大利段 0000-0000", size: "sm", color: "#555555", wrap: true }
+            ]
+            }
+        },
+        quickReply: {
+            items: [
+            {
+                type: "action",
+                action: {
+                type: "postback",
+                label: "查詢復興區地段",
+                data: "action=query_land",
+                displayText: "查詢復興區地段"
+                }
+            }
+            ]
+        }
+        };
+        return client.replyMessage(event.replyToken, introFlex);
+    }
+
+    // ★ 點「查詢復興區地段」→ 立即要求使用者輸入
+    if (action === "query_land") {
+        return client.replyMessage(event.replyToken, {
+        type: "text",
+        text:
+    `請輸入「地段 地號」
+    範例：
+    ・大灣段 0000
+    ・大利段 0000-0000
+    （目前只開放：桃園市 復興區）`
+        });
+    }
+
 
     // 回方案列表（兩張總覽）
     if (action === "view_plan_list") {
