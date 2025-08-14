@@ -42,7 +42,8 @@ app.get("/", (req, res) => {
     res.send("Jieyou LINE Bot is running!");
   });
 
-// webhook 接收與處理
+  
+// webhook 接收與處理 ==> 就像一個「總路由器 (router)」
 app.post("/webhook", middleware(config), (req, res) => {
     // 加入這段處理 LINE 的空事件驗證請求
     if (!req.body.events || req.body.events.length === 0) {
@@ -88,48 +89,84 @@ async function handleEvent(event) {
   // 1) 先處理 postback（不顯示文字、切換卡片）
   // Postback：切換明細 / 回總覽 / 回列表
   if (event.type === "postback") {
-    const p = new URLSearchParams(event.postback.data || "");
-    //// view_plan / view_plan_overview / view_plan_list
+    const data = event.postback.data || "";
+    const p = new URLSearchParams(data);
     const action = p.get("action");
     const plan = p.get("plan");
 
-    //地段地號
-
-    // ★ from Rich Menu Tab2 內容區：開查詢指引（Flex + Quick Reply）
-    if (action === "open_query_intro") {
-        const introFlex = {
-        type: "flex",
-        altText: "地段查詢指引",
-        contents: {
-            type: "bubble",
-            body: {
-            type: "box",
-            layout: "vertical",
-            contents: [
-                { type: "text", text: "地段查詢指引", weight: "bold", size: "lg" },
-                { type: "text", text: "目前只開放：桃園市・復興區", size: "sm", color: "#888888", margin: "sm" },
-                { type: "separator", margin: "md" },
-                { type: "text", text: "請輸入：地段 + 地號", size: "sm", margin: "md" },
-                { type: "text", text: "範例：大灣段 0000 或 大利段 0000-0000", size: "sm", color: "#555555", wrap: true }
-            ]
-            }
-        },
+    // === DEMO 功能入口：跳出 Quick Reply ===
+    if (action === "case_demo") {
+      return client.replyMessage(event.replyToken, {
+        type: "text",
+        text: "🧪 DEMO 功能清單，請選擇：",
         quickReply: {
-            items: [
+          items: [
+            // A) 正式路徑：引導使用者輸入（postback）
             {
-                type: "action",
-                action: {
+              type: "action",
+              action: {
                 type: "postback",
-                label: "查詢復興區地段",
+                label: "「查詢復興區地段」",
                 data: "action=query_land",
                 displayText: "查詢復興區地段"
-                }
+              }
+            },
+            // B) 立即 DEMO（message）：直接送可解析的字串 → 你的 parser + queue 會接手
+            {
+              type: "action",
+              action: { type: "message", label: "DEMO：大灣段 0000", text: "大灣段 0000" }
+            },
+            {
+              type: "action",
+              action: { type: "message", label: "DEMO：大利段 1306-0000", text: "大利段 1306-0000" }
             }
-            ]
+          ]
         }
-        };
-        return client.replyMessage(event.replyToken, introFlex);
+      });
     }
+    // const data = event.postback.data || "";
+    // const p = new URLSearchParams(data);
+    // const action = p.get("action");
+    // const plan = p.get("plan");
+
+    // // === DEMO 功能入口：跳出 Quick Reply ===
+    // //地段地號
+
+    // // ★ from Rich Menu Tab2 內容區：開查詢指引（Flex + Quick Reply）
+    // if (action === "open_query_intro") {
+    //     const introFlex = {
+    //     type: "flex",
+    //     altText: "地段查詢指引",
+    //     contents: {
+    //         type: "bubble",
+    //         body: {
+    //         type: "box",
+    //         layout: "vertical",
+    //         contents: [
+    //             { type: "text", text: "地段查詢指引", weight: "bold", size: "lg" },
+    //             { type: "text", text: "目前只開放：桃園市・復興區", size: "sm", color: "#888888", margin: "sm" },
+    //             { type: "separator", margin: "md" },
+    //             { type: "text", text: "請輸入：地段 + 地號", size: "sm", margin: "md" },
+    //             { type: "text", text: "範例：大灣段 0000 或 大利段 0000-0000", size: "sm", color: "#555555", wrap: true }
+    //         ]
+    //         }
+    //     },
+    //     quickReply: {
+    //         items: [
+    //         {
+    //             type: "action",
+    //             action: {
+    //             type: "postback",
+    //             label: "查詢復興區地段",
+    //             data: "action=query_land",
+    //             displayText: "查詢復興區地段"
+    //             }
+    //         }
+    //         ]
+    //     }
+    //     };
+    //     return client.replyMessage(event.replyToken, introFlex);
+    // }
 
     // ★ 點「查詢復興區地段」→ 立即要求使用者輸入
     if (action === "query_land") {
