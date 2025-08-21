@@ -119,7 +119,7 @@ module.exports = {
           },
           {
             "type": "text",
-            "text": "一組卡片設計價格：NT$2,500 起",
+            "text": "一組卡片設計價格：NT$2,500 起(依複雜度而定)",
             "size": "xs",
             "align": "end",
             "color": "#4e7699"
