@@ -20,7 +20,7 @@ const proDetailBubble   = require("./flex/proDetailBubble");
 
 // 模組：首次加入好友：（品牌卡片 → 文字歡迎 → 快速導引需求選單）三連發所需模組
 const welcomeBrandBubble  = require("./flex/welcomeBrandBubble"); //品牌slogan
-const buildWelcomeText    = require(".flex/messages/welcomeText");//加入好友文字訊息
+const buildWelcomeText    = require("./flex/messages/welcomeText");//加入好友文字訊息
 const needsVerticalBubble = require("./flex/needsVerticalBubble");//首次加入好友快速導引需求
 
 const app = express();
