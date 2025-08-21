@@ -53,7 +53,8 @@ module.exports = {
             "size": "full",
             "aspectRatio": "3:2",
             "aspectMode": "cover",
-            "margin": "sm"
+            "margin": "sm",
+            action: { type: "uri", uri: "https://i.postimg.cc/SsRfgJYy/image.png" }
           }
         ]
       },
@@ -78,7 +79,8 @@ module.exports = {
             "size": "full",
             "aspectRatio": "3:2",
             "aspectMode": "cover",
-            "margin": "sm"
+            "margin": "sm",
+            action: { type: "uri", uri: "https://i.postimg.cc/SNfYzmjV/4.png" }
           },
           {
             "type": "text",
@@ -92,7 +94,8 @@ module.exports = {
             "size": "full",
             "aspectRatio": "3:2",
             "aspectMode": "cover",
-            "margin": "sm"
+            "margin": "sm",
+            action: { type: "uri", uri: "https://i.postimg.cc/1XPHkyjY/image.png" }
           }
         ]
       }

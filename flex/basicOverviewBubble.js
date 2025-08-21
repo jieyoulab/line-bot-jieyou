@@ -6,7 +6,8 @@ module.exports = {
       url: "https://i.postimg.cc/3xWyJPMS/hero-image-basic.png",
       size: "full",
       aspectRatio: "3:2",
-      aspectMode: "cover"
+      aspectMode: "cover",
+      action: { type: "uri", uri: "https://i.postimg.cc/3xWyJPMS/hero-image-basic.png" }
     },
     body: {
       type: "box",
@@ -14,7 +15,7 @@ module.exports = {
       spacing: "sm",
       contents: [
         { type: "text", text: "🌱 基礎方案", weight: "bold", size: "lg", color: "#4e7699" },
-        { type: "text", text: "LINE OA 開設 + 機器人 + 圖文選單設計", size: "sm", wrap: true, color: "#444444" },
+        { type: "text", text: "LINEOA開設 + 機器人 + 圖文選單＆訊息卡片", size: "sm", wrap: true, color: "#444444" },
         { type: "separator", margin: "md" },
         {
           type: "box",
@@ -22,8 +23,9 @@ module.exports = {
           spacing: "xs",
           margin: "md",
           contents: [
-            { type: "text", text: "• 官方帳號註冊 / 認證 / 歡迎訊息", size: "sm", wrap: true },
-            { type: "text", text: "• 自動回覆機器人（圖文選單 / 回覆訊息卡片）", size: "sm", wrap: true },
+            { type: "text", text: "• 官方帳號註冊/認證/歡迎訊息", size: "sm", wrap: true },
+            { type: "text", text: "• 自動回覆機器人 ▶️ 圖文選單設計", size: "sm", wrap: true },
+            { type: "text", text: "• 自動回覆機器人 ▶️ 回覆訊息卡片", size: "sm", wrap: true },
           ]
         }
       ]
