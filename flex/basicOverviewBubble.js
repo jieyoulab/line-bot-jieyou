@@ -3,7 +3,7 @@ module.exports = {
     size: "mega",
     hero: {
       type: "image",
-      url: "https://i.postimg.cc/pr7KhM5y/2.png",
+      url: "https://i.postimg.cc/3xWyJPMS/hero-image-basic.png",
       size: "full",
       aspectRatio: "3:2",
       aspectMode: "cover"
@@ -23,8 +23,7 @@ module.exports = {
           margin: "md",
           contents: [
             { type: "text", text: "• 官方帳號註冊 / 認證 / 歡迎訊息", size: "sm", wrap: true },
-            { type: "text", text: "• 自動回覆機器人（基本回覆 / 關鍵字）", size: "sm", wrap: true },
-            { type: "text", text: "• 圖文選單設計（6 格可客製）", size: "sm", wrap: true }
+            { type: "text", text: "• 自動回覆機器人（圖文選單 / 回覆訊息卡片）", size: "sm", wrap: true },
           ]
         }
       ]
