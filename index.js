@@ -161,29 +161,29 @@ async function handleEvent(event) {
   // 2) 再處理文字訊息（給你測試或接圖文選單「傳送訊息」）
   // D) 文字訊息（可手動觸發或接圖文選單「傳送訊息」）
   if (event.type === "message" && event.message.type === "text") {
-    const msg = (event.message.text || "").trim();
+    const msg = event.message.text || ""
+    const lower = msg.toLowerCase();
+    const trimmed = msg.trim();
 
-  // 手動觸發三連發（方便你測試）
-  if (["hi", "hello", "開始", "start", "歡迎"].includes(msg.toLowerCase())) {
+
+    // 手動觸發三連發（中英都支援）
+    if (["hi", "hello", "start"].includes(lower) || ["開始", "歡迎"].includes(trimmed)) {
       return handleFollow(event, client);
-  }
+    }
 
-  //const msg = event.message.text;
-
-  // 先處理你的固定關鍵字
-  if (msg.trim() === "LINE 官方帳號建置") {
-    return client.replyMessage(event.replyToken, {
+    // 固定關鍵字
+    if (trimmed === "LINE 官方帳號建置") {
+      return client.replyMessage(event.replyToken, {
         type: "flex",
         altText: "LINE 官方帳號建置",
-        contents: plansMenuCarousel,
-    });
+        contents: plansMenuCarousel
+      });
+    }
+
+    // 沒匹配到
+    return Promise.resolve(null);
   }
-
-
-// 沒匹配到就回個提示（避免使用者以為壞掉）
-  return Promise.resolve(null);
 }
-
 // ＝＝＝＝ Welcome Flow ＝＝＝＝
 
 async function handleFollow(event, client) {
@@ -221,9 +221,10 @@ async function getDisplayNameSafe(event, client) {
     return "朋友";
   }
 }
-}
+
 
 const port = process.env.PORT || 3006;
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

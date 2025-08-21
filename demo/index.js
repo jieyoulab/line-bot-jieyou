@@ -5,6 +5,9 @@
 const { crawlQueue } = require('./queue');
 const { parseSectionAndLandNo } = require('./parser');
 
+// 記錄：按過 demo 入口（query_land）的人，之後文字才交給 demo
+const demoReadyUsers = new Set();
+
 // 可用白名單鎖 demo（可先不開）
 function isDemoAllowed(userId) {
   if (process.env.DEMO_LOCK_ENABLED !== 'true') return true;
@@ -62,6 +65,7 @@ async function handleDemoEvent(event, client) {
     if (action === 'query_land') {
 
       // 標記此使用者接下來的文字由 demo 接手
+      //// 記錄此人進入 demo 文字模式
       if (userId) demoReadyUsers.add(userId);
 
       await client.replyMessage(event.replyToken, {
@@ -80,11 +84,14 @@ async function handleDemoEvent(event, client) {
   }
 
   // 2) 文字訊息：解析「段名 + 地號」→ enqueue
+  //文字訊息：只有按過 query_land 的人才由 demo 處理
   if (event.type === 'message' && event.message?.type === 'text') {
     const msg = event.message.text || '';
 
-    // 只有按過 query_land 的人才由 demo 處理，否則放行（讓 hi/開始 走主流程）
-    if (!userId || !demoReadyUsers.has(userId)) return false;
+    if (!userId || !demoReadyUsers.has(userId)) {
+      // 尚未進入 demo 文字模式 → 放行給主程式（hi/開始 才會觸發三連發）
+      return false;
+    }
 
     const parsed = parseSectionAndLandNo(msg);
 
@@ -116,7 +123,7 @@ async function handleDemoEvent(event, client) {
   }
 
   // 若你想在入列成功後就關閉 demo 接手，可解除註解下一行：
-  demoReadyUsers.delete(userId);
+  //demoReadyUsers.delete(userId);
 
   // 非 demo 事件
   return false;
