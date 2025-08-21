@@ -84,6 +84,14 @@ async function handleEvent(event) {
     const need   = p.get("need"); //剛加入好友，快速導引需求
     const plan = p.get("plan");
 
+      // 保險：demo 相關一律交給 demo 模組
+    if (action === "case_demo" || action === "query_land") {
+      const handled = await handleDemoEvent(event, client);
+      if (handled) return;
+      await client.replyMessage(event.replyToken, { type: "text", text: "DEMO 僅限特定商家內測🙏" });
+      return;
+  }
+
     // ①快速導引需求 need => 需求入口（新做的直式選單）
     if (action === "need") {
       if (need === "startup") {
@@ -188,7 +196,7 @@ async function handleEvent(event) {
 
 async function handleFollow(event, client) {
   const nickname = await getDisplayNameSafe(event, client);
-  const accountName = process.env.ACCOUNT_NAME || "解憂工程所 Jieyou Lab";
+  const accountName = process.env.ACCOUNT_NAME || "解憂工程";
 
   const messages = [
     // Step 1: 品牌卡片（Flex）

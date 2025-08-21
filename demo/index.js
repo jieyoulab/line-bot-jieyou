@@ -24,9 +24,10 @@ function isDemoAllowed(userId) {
  */
 async function handleDemoEvent(event, client) {
   const userId = event.source?.userId;
-
+  console.log('[DEMO] event.type =', event.type, 'userId =', userId);
   // Demo 鎖（可先關閉：DEMO_LOCK_ENABLED=false）
   if (!isDemoAllowed(userId)) {
+    console.log('[DEMO] blocked by DEMO_LOCK');
     // 若你希望直接略過 demo 而不是回覆，可回傳 false
     return false;
   }

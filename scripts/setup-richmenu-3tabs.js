@@ -66,7 +66,7 @@ function areasTab1() { // 友誼推廣
   return [
     ...topTabs(),
     { bounds: { x: COLX[0], y: row1Y, width: COLW[0], height: row1H }, action: { type:'postback', data:'action=cooperate',   label:'長期合作洽談', displayText:'長期合作洽談' } },
-    { bounds: { x: COLX[1], y: row1Y, width: COLW[1], height: row1H }, action: { type:'uri',      uri:'https://github.com/', label:'GitHub 作品集' } },
+    { bounds: { x: COLX[1], y: row1Y, width: COLW[1], height: row1H }, action: { type:'uri',      uri:'https://github.com/jieyoulab', label:'GitHub 作品集' } },
     { bounds: { x: COLX[2], y: row1Y, width: COLW[2], height: row1H }, action: { type:'postback', data:'action=qrcode',      label:'建置中(QRcode)', displayText:'建置中(QRcode)' } },
     { bounds: { x: SP,      y: row2Y, width: row2W,   height: row2H }, action: { type:'postback', data:'action=community',   label:'社群與評價', displayText:'社群與評價' } },
   ];
@@ -90,8 +90,8 @@ function areasTab3() { // 案例展示
     ...topTabs(),
     { bounds: { x: COLX[0], y: row1Y, width: COLW[0], height: rowH }, action: { type:'postback', data:'action=case_crm',    label:'客戶數據', displayText:'客戶數據建置' } },
     { bounds: { x: COLX[1], y: row1Y, width: COLW[1], height: rowH }, action: { type:'postback', data:'action=case_booking', label:'預約系統', displayText:'預約系統建置' } },
-    { bounds: { x: COLX[2], y: row1Y, width: COLW[2], height: rowH }, action: { type:'postback', data:'action=case_cart',    label:'購物車&金流', displayText:'購物車&金流' } },
-    { bounds: { x: COLX[0], y: row2Y, width: COLW[0], height: rowH }, action: { type:'postback', data:'action=case_bizsite', label:'商家網站', displayText:'商家網站建置' } },
+    { bounds: { x: COLX[2], y: row1Y, width: COLW[2], height: rowH }, action: { type:'postback', data:'action=case_cart',    label:'購物車&金流', displayText:'購物車&金流' } },// 🔽 這裡改成直接開網址
+    { bounds: { x: COLX[0], y: row2Y, width: COLW[0], height: rowH }, action: { type:'uri', uri:'https://camping-project-one.vercel.app/', label:'商家網站', displayText:'商家網站建置' } },
     { bounds: { x: COLX[1], y: row2Y, width: COLW[1], height: rowH }, action: { type:'postback', data:'action=case_ai',      label:'AI/自動化', displayText:'AI/自動化流程' } },
     { bounds: { x: COLX[2], y: row2Y, width: COLW[2], height: rowH }, action: { type:'postback', data:'action=case_demo',    label:'DEMO功能', displayText:'臨時功能測試區' } },
   ];
