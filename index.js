@@ -7,16 +7,21 @@ const { Client, middleware } = require("@line/bot-sdk");
 const { handleDemoEvent } = require('./demo');
 
 
-//Carousel為主 比較好擴充
+//Carousel為主 比較好擴充(Carousel 中可以有多個Bubble卡片)
 const plansMenuCarousel   = require("./flex/carousel/plansMenuCarousel");
 
-//基礎方案
+//Bubble 基礎方案
 const basicOverviewBubble = require("./flex/basicOverviewBubble");
 const basicDetailBubble = require("./flex/basicDetailBubble");
 
-//進階方案
+//Bubble 進階方案
 const proOverviewBubble = require("./flex/proOverviewBubble");
 const proDetailBubble   = require("./flex/proDetailBubble"); 
+
+// 模組：首次加入好友：（品牌卡片 → 文字歡迎 → 快速導引需求選單）三連發所需模組
+const welcomeBrandBubble  = require("./flex/welcomeBrandBubble"); //品牌slogan
+const buildWelcomeText    = require("./messages/welcomeText");//加入好友文字訊息
+const needsVerticalBubble = require("./flex/needsVerticalBubble");//首次加入好友快速導引需求
 
 const app = express();
 
@@ -59,11 +64,16 @@ app.post("/webhook", middleware(config), (req, res) => {
 // --- handlers ---
 // 回覆邏輯
 async function handleEvent(event) {
-  // ❷ 先交給 demo 模組處理
+  //  A) 先給 demo 模組嘗試處理
   const isDemoHandled = await handleDemoEvent(event, client);
   if (isDemoHandled) return; // demo 已處理，結束
 
+  // B) 好友加入（或解除封鎖後再加入）→ 三連發
+  if (event.type === "follow") {
+    return handleFollow(event, client);
+  }
 
+  //C) Postback 分流
   // 1) 先處理 postback（不顯示文字、切換卡片）
   // Postback
   if (event.type === "postback") {
@@ -71,9 +81,33 @@ async function handleEvent(event) {
     console.log("POSTBACK:", data); 
     const p = new URLSearchParams(data);
     const action = p.get("action");
+    const need   = p.get("need"); //剛加入好友，快速導引需求
     const plan = p.get("plan");
 
-
+    // ①快速導引需求 need => 需求入口（新做的直式選單）
+    if (action === "need") {
+      if (need === "startup") {
+        // 導到你既有的 LINE 方案總覽
+        return client.replyMessage(event.replyToken, {
+          type: "flex",
+          altText: "LINE 官方帳號建置",
+          contents: plansMenuCarousel
+        });
+      }
+      if (need === "automation") {
+        return client.replyMessage(event.replyToken, [
+          { type: "text", text: "了解！我們可先初步討論目前貴公司繁瑣工作流程的痛點，將提供不同成本方案來導入流程自動化。" },
+          { type: "text", text: "若方便，請先填寫需求表單，我們將盡快與您聯繫：\nhttps://your-form-link" }
+        ]);
+      }
+      if (need === "web_maintenance") {
+        return client.replyMessage(event.replyToken, [
+          { type: "text", text: "OK！我們支援您現有網站的維護與升級。" },
+          { type: "text", text: "請提供目前網站連結與想改善的重點 🙏" }
+        ]);
+      }
+      return Promise.resolve(null);
+    }
 
     //方案列表（兩張總覽）
     if (action === 'line_oa_build') {
@@ -125,11 +159,16 @@ async function handleEvent(event) {
   }
 
   // 2) 再處理文字訊息（給你測試或接圖文選單「傳送訊息」）
-  if (event.type !== "message" || event.message.type !== "text") {
-    return Promise.resolve(null);
+  // D) 文字訊息（可手動觸發或接圖文選單「傳送訊息」）
+  if (event.type === "message" && event.message.type === "text") {
+    const msg = (event.message.text || "").trim();
+
+  // 手動觸發三連發（方便你測試）
+  if (["hi", "hello", "開始", "start", "歡迎"].includes(msg.toLowerCase())) {
+      return handleFollow(event, client);
   }
 
-  const msg = event.message.text;
+  //const msg = event.message.text;
 
   // 先處理你的固定關鍵字
   if (msg.trim() === "LINE 官方帳號建置") {
@@ -145,6 +184,44 @@ async function handleEvent(event) {
   return Promise.resolve(null);
 }
 
+// ＝＝＝＝ Welcome Flow ＝＝＝＝
+
+async function handleFollow(event, client) {
+  const nickname = await getDisplayNameSafe(event, client);
+  const accountName = process.env.ACCOUNT_NAME || "解憂工程所 Jieyou Lab";
+
+  const messages = [
+    // Step 1: 品牌卡片（Flex）
+    {
+      type: "flex",
+      altText: "歡迎加入解憂工程所",
+      contents: welcomeBrandBubble
+    },
+    // Step 2: 文字歡迎（帶暱稱）
+    buildWelcomeText({ nickname, accountName }),
+    // Step 3: 直式需求選單（Flex）
+    {
+      type: "flex",
+      altText: "需求導引選單",
+      contents: needsVerticalBubble
+    }
+  ];
+
+  return client.replyMessage(event.replyToken, messages);
+}
+
+async function getDisplayNameSafe(event, client) {
+  try {
+    if (event.source && event.source.userId) {
+      const profile = await client.getProfile(event.source.userId);
+      return profile.displayName || "朋友";
+    }
+    return "朋友";
+  } catch {
+    return "朋友";
+  }
+}
+}
 
 const port = process.env.PORT || 3006;
 app.listen(port, () => {

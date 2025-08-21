@@ -1,5 +1,5 @@
 // scripts/setup-richmenu-3tabs.js
-
+//正確分流 api / api-data、建立→等一致→上傳→Alias→設預設）
 // === 1) 讀環境變數與小工具 ====
 require('dotenv').config();
 const fs = require('fs');
