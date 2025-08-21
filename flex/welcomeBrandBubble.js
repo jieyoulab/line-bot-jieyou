@@ -24,7 +24,7 @@ module.exports = {
         },
         {
           type: "text",
-          text: "- 技術因需求而活，需求因想像而生 -",
+          text: "-技術因需求而活，需求因想像而生-",
           size: "md",
           color: "#e18d97",
           wrap: true,

@@ -85,12 +85,12 @@ async function handleEvent(event) {
     const plan = p.get("plan");
 
       // 保險：demo 相關一律交給 demo 模組
-    if (action === "case_demo" || action === "query_land") {
-      const handled = await handleDemoEvent(event, client);
-      if (handled) return;
-      await client.replyMessage(event.replyToken, { type: "text", text: "DEMO 僅限特定商家內測🙏" });
-      return;
-  }
+  //   if (action === "case_demo" || action === "query_land") {
+  //     const handled = await handleDemoEvent(event, client);
+  //     if (handled) return;
+  //     await client.replyMessage(event.replyToken, { type: "text", text: "DEMO 僅限特定商家內測🙏" });
+  //     return;
+  // }
 
     // ①快速導引需求 need => 需求入口（新做的直式選單）
     if (action === "need") {
@@ -105,13 +105,13 @@ async function handleEvent(event) {
       if (need === "automation") {
         return client.replyMessage(event.replyToken, [
           { type: "text", text: "了解！我們可先初步討論目前貴公司繁瑣工作流程的痛點，將提供不同成本方案來導入流程自動化。" },
-          { type: "text", text: "若方便，請先填寫需求表單，我們將盡快與您聯繫：\nhttps://your-form-link" }
+          { type: "text", text: "若方便，請先填寫需求表單，我們將盡快與您聯繫：\nhttps://docs.google.com/forms/d/e/1FAIpQLSdIWw7vChsH5jhvUPhjmOLotBqqwqu8zcoZJEc80zek_t-ARw/viewform" }
         ]);
       }
       if (need === "web_maintenance") {
         return client.replyMessage(event.replyToken, [
           { type: "text", text: "OK！我們支援您現有網站的維護與升級。" },
-          { type: "text", text: "請提供目前網站連結與想改善的重點 🙏" }
+          { type: "text", text: "請提供目前網站連結與想改善的重點:\nhttps://docs.google.com/forms/d/e/1FAIpQLSdIWw7vChsH5jhvUPhjmOLotBqqwqu8zcoZJEc80zek_t-ARw/viewform🙏" }
         ]);
       }
       return Promise.resolve(null);
