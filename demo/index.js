@@ -60,13 +60,17 @@ async function handleDemoEvent(event, client) {
 
     // 點「查詢圖資」→ 引導輸入
     if (action === 'query_land') {
+
+      // 標記此使用者接下來的文字由 demo 接手
+      if (userId) demoReadyUsers.add(userId);
+
       await client.replyMessage(event.replyToken, {
         type: 'text',
         text:
-`📢 目前只有：桃園市 復興區圖資查詢
-請輸入「地段 地號」，例如：
-・美麗段 0000
-・美麗段 0000-0000`
+          `📢 目前只有：桃園市 復興區圖資查詢
+          請輸入「地段 地號」，例如：
+          ・美麗段 0000
+          ・美麗段 0000-0000`
       });
       return true;
     }
@@ -78,9 +82,14 @@ async function handleDemoEvent(event, client) {
   // 2) 文字訊息：解析「段名 + 地號」→ enqueue
   if (event.type === 'message' && event.message?.type === 'text') {
     const msg = event.message.text || '';
+
+    // 只有按過 query_land 的人才由 demo 處理，否則放行（讓 hi/開始 走主流程）
+    if (!userId || !demoReadyUsers.has(userId)) return false;
+
     const parsed = parseSectionAndLandNo(msg);
 
     if (!parsed) {
+      // 這裡可以再提醒一次格式；提醒後仍由 demo 處理，故 return true
       await client.replyMessage(event.replyToken, {
         type: 'text',
         text: '請輸入想查詢的地段地號格式：\n「大利段 0000」或「大利段0000-0000」'
@@ -105,6 +114,9 @@ async function handleDemoEvent(event, client) {
     });
     return true;
   }
+
+  // 若你想在入列成功後就關閉 demo 接手，可解除註解下一行：
+  demoReadyUsers.delete(userId);
 
   // 非 demo 事件
   return false;
