@@ -18,7 +18,15 @@ module.exports = {
         contents: [
           { type: "text", text: "✅ 協助註冊 / 認證 / 歡迎訊息設定", size: "sm", wrap: true },
           { type: "text", text: "建議價格：NT$1,500 起", size: "xs", align: "end", color: "#4e7699" },
-          { type: "image", url: "https://i.postimg.cc/8s8rGCKg/demo.png", size: "full", aspectRatio: "3:2", aspectMode: "cover", margin: "sm" }
+          {
+            type: "image",
+            url: "https://i.postimg.cc/8s8rGCKg/demo.png",
+            size: "full",
+            aspectRatio: "3:2",
+            aspectMode: "cover",
+            margin: "sm",
+            action: { type: "uri", uri: "https://i.postimg.cc/8s8rGCKg/demo.png" }
+          }
         ]
       },
 
@@ -30,7 +38,15 @@ module.exports = {
         spacing: "xs",
         contents: [
           { type: "text", text: "✅ 建置與部署：串接 API、雲端部署", size: "sm", wrap: true },
-          { type: "image", url: "https://i.postimg.cc/3w4tYZnF/3.png", size: "full", aspectRatio: "3:2", aspectMode: "cover", margin: "sm" }
+          {
+            type: "image",
+            url: "https://i.postimg.cc/3w4tYZnF/3.png",
+            size: "full",
+            aspectRatio: "3:2",
+            aspectMode: "cover",
+            margin: "sm",
+            action: { type: "uri", uri: "https://i.postimg.cc/3w4tYZnF/3.png" }
+          }
         ]
       },
 
@@ -42,7 +58,15 @@ module.exports = {
         spacing: "xs",
         contents: [
           { type: "text", text: "▶️ 大版型：單頁/多頁(熱門)", size: "sm", wrap: true },
-          { type: "image", url: "https://i.postimg.cc/SsRfgJYy/image.png", size: "full", aspectRatio: "3:2", aspectMode: "cover", margin: "sm" }
+          {
+            type: "image",
+            url: "https://i.postimg.cc/SsRfgJYy/image.png",
+            size: "full",
+            aspectRatio: "3:2",
+            aspectMode: "cover",
+            margin: "sm",
+            action: { type: "uri", uri: "https://i.postimg.cc/SsRfgJYy/image.png" }
+          }
         ]
       },
 
@@ -53,7 +77,15 @@ module.exports = {
         spacing: "xs",
         contents: [
           { type: "text", text: "▶️ 小版型🌟", size: "sm", wrap: true },
-          { type: "image", url: "https://i.postimg.cc/SNfYzmjV/4.png", size: "full", aspectRatio: "3:2", aspectMode: "cover", margin: "sm" }
+          {
+            type: "image",
+            url: "https://i.postimg.cc/SNfYzmjV/4.png",
+            size: "full",
+            aspectRatio: "3:2",
+            aspectMode: "cover",
+            margin: "sm",
+            action: { type: "uri", uri: "https://i.postimg.cc/SNfYzmjV/4.png" }
+          }
         ]
       }
     ]
@@ -81,8 +113,7 @@ module.exports = {
         }
       }
     ]
-  },
-  styles: { footer: { separator: true } }
+  }
 };
 
 // module.exports = {
