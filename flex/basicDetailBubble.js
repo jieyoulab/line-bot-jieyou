@@ -9,7 +9,6 @@ module.exports = {
     contents: [
       { type: "text", text: "🌱 基礎方案｜內容明細", weight: "bold", size: "lg", color: "#4e7699" },
       { type: "separator", margin: "md" },
-
       { type: "text", text: "1️⃣ LINE 官方帳號開設", weight: "bold", size: "sm", margin: "md" },
       {
         type: "box",
@@ -25,7 +24,14 @@ module.exports = {
             aspectMode: "cover",
             margin: "sm",
             action: { type: "uri", uri: "https://i.postimg.cc/656m1hRL/Lineoa.png" }
-          }
+          },
+          {
+            "type": "text",
+            "text": "建議價格：NT$1,500 起",
+            "size": "xs",
+            "align": "end",
+            "color": "#4e7699"
+          },
         ]
       },
       { type: "separator", margin: "md" },
@@ -55,6 +61,13 @@ module.exports = {
             "aspectMode": "cover",
             "margin": "sm",
             action: { type: "uri", uri: "https://i.postimg.cc/SsRfgJYy/image.png" }
+          },
+          {
+            "type": "text",
+            "text": "單頁設計價格：NT$3,000 起",
+            "size": "xs",
+            "align": "end",
+            "color": "#4e7699"
           }
         ]
       },
@@ -84,6 +97,13 @@ module.exports = {
           },
           {
             "type": "text",
+            "text": "小版型單頁設計價格：NT$1,500 起",
+            "size": "xs",
+            "align": "end",
+            "color": "#4e7699"
+          },
+          {
+            "type": "text",
             "text": "▶️ 自動回覆訊息卡片",
             "size": "sm",
             "wrap": true
@@ -96,7 +116,14 @@ module.exports = {
             "aspectMode": "cover",
             "margin": "sm",
             action: { type: "uri", uri: "https://i.postimg.cc/1XPHkyjY/image.png" }
-          }
+          },
+          {
+            "type": "text",
+            "text": "一組卡片設計價格：NT$2,500 起",
+            "size": "xs",
+            "align": "end",
+            "color": "#4e7699"
+          },
         ]
       }
     ]

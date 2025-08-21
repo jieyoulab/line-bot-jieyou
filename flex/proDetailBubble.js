@@ -28,9 +28,9 @@ module.exports = {
           spacing: "xs",
           contents: [
             { type: "text", text: "✅ 表單自動記錄與 Email 通知（表單 → 試算表 → 寄送通知）", size: "sm", wrap: true },
-            { type: "text", text: "✅ LINE 專屬表單：LINE 內開啟與填寫，自動帶入用戶資訊（不含外觀設計與資料庫建置）", size: "sm", wrap: true },
+            { type: "text", text: "✅ LINE 客製化表單：LINE 內開啟與填寫，自動帶入用戶資訊（不含外觀設計與資料庫建置）", size: "sm", wrap: true },
             { type: "text", text: "自動記錄／Email：NT$2,000", size: "xs", align: "end", color: "#4e7699" },
-            { type: "text", text: "LINE 專屬表單：NT$5,000～12,000", size: "xs", align: "end", color: "#4e7699" }
+            { type: "text", text: "LINE 客製化表單：NT$5,000～12,000", size: "xs", align: "end", color: "#4e7699" }
           ]
         },
   
@@ -43,7 +43,7 @@ module.exports = {
           contents: [
             { type: "text", text: "✅ 串接 LINE Pay：建立付款流程、報名整合、票券產出", size: "sm", wrap: true },
             { type: "text", text: "✅ 退款功能支援：商家後台協助／自動退款設計", size: "sm", wrap: true },
-            { type: "text", text: "LINE Pay 串接：NT$5,000 起｜退款功能：+NT$2,000（一次性開發）", size: "xs", align: "end", color: "#4e7699" }
+            { type: "text", text: "LINE Pay 串接：NT$7,000 起", size: "xs", align: "end", color: "#4e7699" }
           ]
         },
   
@@ -51,7 +51,7 @@ module.exports = {
         { type: "text", text: "官方費用：LINE Pay 3% + NT$10／筆（由 LINE 官方收取）", size: "xs", color: "#888888", wrap: true },
   
         { type: "separator", margin: "md" },
-        { type: "text", text: "進階方案參考價：NT$27,500 起", size: "sm", align: "end", color: "#4e7699", wrap: true },
+        // { type: "text", text: "進階方案參考價：NT$27,500 起", size: "sm", align: "end", color: "#4e7699", wrap: true },
         { type: "text", text: "不含 LINE Pay 官方手續費以及伺服器費用", size: "sm", align: "end", color: "#4e7699", wrap: true }
       ]
     },
