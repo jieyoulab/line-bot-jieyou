@@ -79,7 +79,7 @@ function areasTab2() { // 解憂服務
   return [
     ...topTabs(),
     { bounds: { x: SP,      y: heroY, width: heroW,   height: heroH }, action: { type:'postback', data:'action=line_oa_build', label:'LINE OA 建置', displayText:'LINE 官方帳號建置' } },
-    { bounds: { x: COLX[0], y: rowY,  width: COLW[0], height: rowH  }, action: { type:'postback', data:'action=site_build',     label:'形象網站建置', displayText:'形象網站建置' } },
+    { bounds: { x: COLX[0], y: rowY,  width: COLW[0], height: rowH  }, action: { type:'postback', data:'action=contact_us',     label:'聯絡我們', displayText:'聯絡我們' } },
     { bounds: { x: COLX[1], y: rowY,  width: COLW[1], height: rowH  }, action: { type:'postback', data:'action=site_maintain',  label:'現有網站維護', displayText:'現有網站維護' } },
   ];
 }

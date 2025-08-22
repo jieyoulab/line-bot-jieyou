@@ -84,6 +84,12 @@ async function handleEvent(event) {
     const need   = p.get("need"); //剛加入好友，快速導引需求
     const plan = p.get("plan");
 
+    const userId = event.source?.userId;
+
+    // ✅ human mode 中時，只允許「結束客服」操作，其餘 postback 忽略
+    if (userId && isHuman(userId) && action !== "resume_bot") {
+      return Promise.resolve(null);
+    }
       // 保險：demo 相關一律交給 demo 模組
   //   if (action === "case_demo" || action === "query_land") {
   //     const handled = await handleDemoEvent(event, client);
@@ -91,6 +97,61 @@ async function handleEvent(event) {
   //     await client.replyMessage(event.replyToken, { type: "text", text: "DEMO 僅限特定商家內測🙏" });
   //     return;
   // }
+    // ❶ 轉真人客服：Rich Menu「聯絡我們」→ 開啟 human mode
+    if (action === "contact_us") {
+      if (userId) enableHuman(userId, 8); // 預設 12 小時
+
+      // （可選）通知內部群組
+      if (process.env.GROUP_ID) {
+        const nickname = await getDisplayNameSafe(event, client);
+        await client.pushMessage(process.env.GROUP_ID, {
+          type: "text",
+          text: `🔔 ${nickname} 請求真人客服（已切換 human mode）`
+        });
+      }
+
+      return client.replyMessage(event.replyToken, [
+        { type: "text", text: "已為您轉接真人客服，請直接在此對話告訴我們需求（我們的夥伴會盡快回覆您）。" },
+        {
+          type: "flex",
+          altText: "您已轉接真人客服",
+          contents: {
+            type: "bubble",
+            body: {
+              type: "box",
+              layout: "vertical",
+              spacing: "md",
+              contents: [
+                { type: "text", text: "🧑‍💻 真人客服中", weight: "bold", size: "lg" },
+                { type: "text", text: "若要回到機器人服務，請點下方按鈕。", size: "sm", color: "#666666", wrap: true }
+              ]
+            },
+            footer: {
+              type: "box",
+              layout: "vertical",
+              contents: [
+                {
+                  type: "button",
+                  style: "primary",
+                  action: { type: "postback", label: "結束客服，回到機器人", data: "action=resume_bot", displayText: "結束客服" }
+                }
+              ]
+            }
+          }
+        }
+      ]);
+    }
+
+    // ❷ 結束真人客服：恢復機器人
+    if (action === "resume_bot") {
+      if (userId) disableHuman(userId);
+
+      return client.replyMessage(event.replyToken, [
+        { type: "text", text: "已結束真人客服，恢復機器人服務 🙌" },
+        { type: "flex", altText: "回到主選單", contents: plansMenuCarousel }
+      ]);
+    }
+
 
     // ①快速導引需求 need => 需求入口（新做的直式選單）
     if (action === "need") {
@@ -169,15 +230,22 @@ async function handleEvent(event) {
   // 2) 再處理文字訊息（給你測試或接圖文選單「傳送訊息」）
   // D) 文字訊息（可手動觸發或接圖文選單「傳送訊息」）
   if (event.type === "message" && event.message.type === "text") {
+    const userId = event.source?.userId;
+
+    // ✅ human mode 中：不回覆文字（讓真人直接在後台回覆）
+    if (userId && isHuman(userId)) {
+      return Promise.resolve(null);
+    }
+
     const msg = event.message.text || ""
     const lower = msg.toLowerCase();
     const trimmed = msg.trim();
 
 
     // 手動觸發三連發（中英都支援）
-    if (["hi", "hello", "start"].includes(lower) || ["開始", "歡迎"].includes(trimmed)) {
-      return handleFollow(event, client);
-    }
+    // if (["hi", "hello", "start"].includes(lower) || ["開始", "歡迎"].includes(trimmed)) {
+    //   return handleFollow(event, client);
+    // }
 
     // 固定關鍵字
     if (trimmed === "LINE 官方帳號建置") {
