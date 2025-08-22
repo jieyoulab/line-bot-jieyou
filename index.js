@@ -37,6 +37,31 @@ const config = {
 
 const client = new Client(config);
 
+
+/* -------------------- Human Mode（真人客服） -------------------- */
+// 用戶按「聯絡我們」→ 開啟 human mode；期間 Bot 不自動回覆文字；
+// 用戶按「結束客服」→ 關閉 human mode，Bot 恢復回覆。
+const HUMAN_TTL_MS = 12 * 60 * 60 * 1000; // 12 小時（可自行調整）
+const humanMap = new Map();                // userId -> expireAt(ms)
+
+function enableHuman(userId, hours = 12) {
+  const ttl = (Number.isFinite(hours) ? hours : HUMAN_TTL_MS / 3600000) * 3600 * 1000;
+  humanMap.set(userId, Date.now() + ttl);
+}
+function disableHuman(userId) {
+  humanMap.delete(userId);
+}
+function isHuman(userId) {
+  const exp = humanMap.get(userId);
+  if (!exp) return false;
+  if (Date.now() > exp) {
+    humanMap.delete(userId); // 逾時自動清掉
+    return false;
+  }
+  return true;
+}
+/* -------------------------------------------------------------- */
+
 //API 區
 // 首頁 
 // health check
