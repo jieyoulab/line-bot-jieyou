@@ -65,9 +65,10 @@ function isHuman(userId) {
 //API 區
 // 首頁 
 // health check
-app.get("/", (req, res) => {
-    res.send("Jieyou LINE Bot is running!");
-  });
+// 建議加個極輕量的健康檢查
+app.get('/health', (req, res) => {
+  res.status(200).send('ok');
+});
 
   
 // webhook 接收與處理 ==> 就像一個「總路由器 (router)」
