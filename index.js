@@ -2,9 +2,10 @@
 require("dotenv").config();
 const express = require("express");
 const { Client, middleware } = require("@line/bot-sdk");
-
+const { initDB, getAllChannels } = require("./db");
 // ❶ 引入 demo 模組（取代你原本內嵌的 parser/queue）
 const { handleDemoEvent } = require('./demo');
+const bodyParser = require("body-parser");
 
 
 //Carousel為主 比較好擴充(Carousel 中可以有多個Bubble卡片)
@@ -60,6 +61,44 @@ function isHuman(userId) {
   }
   return true;
 }
+
+// 存放多個 client
+let lineClients = [];
+
+// 初始化 client（從 DB 撈所有 channel）
+async function initClients() {
+  await initDB(); // 先初始化資料庫
+  const channels = await getAllChannels();
+  lineClients = channels.map(ch => ({
+    channelId: ch.channel_id,
+    client: new Client({
+      channelAccessToken: ch.access_token,
+      channelSecret: ch.channel_secret,
+    }),
+  }));
+  console.log(`已初始化 ${lineClients.length} 個 LINE Channel`);
+}
+
+// 取得對應 client
+function getClientByChannel(channelId) {
+  const found = lineClients.find(c => c.channelId === channelId);
+  return found?.client;
+}
+
+// 動態 middleware：因為每個 channel secret 不同
+function lineMiddleware(req, res, next) {
+  const channelId = req.params.channelId; // <- 從 URL path
+
+  const clientInfo = lineClients.find(c => c.channelId === channelId);
+  if (!clientInfo) {
+    console.error('找不到對應 channel middleware', channelId);
+    return res.status(400).send('Channel not found');
+  }
+  // 使用 line SDK middleware 驗簽
+  const mw = middleware({ channelSecret: clientInfo.client.config.channelSecret });
+  return mw(req, res, next);
+}
+
 /* -------------------------------------------------------------- */
 
 //API 區
@@ -70,26 +109,50 @@ app.get('/health', (req, res) => {
   res.status(200).send('ok');
 });
 
-  
+// Webhook route（單一路由，支援多 channel）
 // webhook 接收與處理 ==> 就像一個「總路由器 (router)」
-app.post("/webhook", middleware(config), (req, res) => {
-    // 加入這段處理 LINE 的空事件驗證請求
-    if (!req.body.events || req.body.events.length === 0) {
-      return res.status(200).send("OK (ping check)");
+app.post("/webhook/:channelId", bodyParser.raw({ type: 'application/json' }), lineMiddleware, async (req, res) => {
+  // req.body 是 Buffer，需要先 parse
+  let body;
+  try {
+    if (Buffer.isBuffer(req.body)) {
+      body = JSON.parse(req.body.toString('utf8'));
+    } else {
+      // 如果 middleware 已經 parse 過，直接用物件
+      body = req.body;
     }
-  
-    Promise.all(req.body.events.map(handleEvent))
-      .then((result) => res.json(result))
-      .catch((err) => {
-        console.error("webhook error", err);
-        res.status(500).end();
-      });
-  });
+  } catch (err) {
+    console.error("JSON 解析失敗", err, "req.body:", req.body);
+    return res.status(400).send("Invalid JSON");
+  }
+
+  console.log("收到 webhook:", body);
+
+  // 加入這段處理 LINE 的空事件驗證請求
+  if (!body.events || body.events.length === 0) {
+    return res.status(200).send("OK (ping check)");
+  }
+
+  const channelId = req.params.channelId;
+  const client = getClientByChannel(channelId);
+  if (!client) {
+    console.error('找不到對應 client', channelId);
+    return res.status(400).send("Channel not found");
+  }
+
+  try {
+    await Promise.all(body.events.map(event => handleEvent(event, client)));
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("webhook error", err);
+    res.status(500).end();
+  }
+});
 
 
 // --- handlers ---
 // 回覆邏輯
-async function handleEvent(event) {
+async function handleEvent(event, client) {
   //  A) 先給 demo 模組嘗試處理
   const isDemoHandled = await handleDemoEvent(event, client);
   if (isDemoHandled) return; // demo 已處理，結束
@@ -325,8 +388,8 @@ async function getDisplayNameSafe(event, client) {
 }
 
 
-const port = process.env.PORT || 3006;
-
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+// 啟動 server
+initClients().then(() => {
+  const port = process.env.PORT || 3006;
+  app.listen(port, () => console.log(`Server running on port ${port}`));
 });

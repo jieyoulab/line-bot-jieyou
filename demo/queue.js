@@ -9,16 +9,18 @@ if (!process.env.REDIS_URL) {
   process.exit(1);
 }
 
+const isTLS = process.env.REDIS_URL.startsWith('rediss://');
+
 const connection = new IORedis(process.env.REDIS_URL, {
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
-  tls: {}, // Upstash rediss:// 用 TLS
+  ...(isTLS ? { tls: {} } : {}), // Upstash rediss:// 用 TLS
 });
 
 const eventsConnection = new IORedis(process.env.REDIS_URL, {
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
-  tls: {},
+  ...(isTLS ? { tls: {} } : {}),
 });
 
 const QUEUE_NAME = 'crawl';
