@@ -77,6 +77,21 @@ app.post("/webhook", middleware(config), (req, res) => {
     if (!req.body.events || req.body.events.length === 0) {
       return res.status(200).send("OK (ping check)");
     }
+    const events = req.body.events || [];
+  events.forEach((ev) => {
+    // 這就是你的 LINE User ID
+    const userId = ev.source?.userId;
+    if (userId) {
+      console.log('[LINE] userId =', userId);
+    }
+
+    // （可選）回一句把 userId 回給你自己，方便抄
+    if (ev.type === 'message' && ev.message?.type === 'text') {
+      replyMessage(ev.replyToken, [
+        { type: 'text', text: `你的 userId 是：${userId || '未知'}` }
+      ]);
+    }
+  });
   
     Promise.all(req.body.events.map(handleEvent))
       .then((result) => res.json(result))
